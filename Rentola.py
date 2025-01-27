@@ -34,7 +34,7 @@ class Rentola:
             link_updated = ("https://rentola.pt" + link)
             response = requests.get(link_updated)
             soup = BeautifulSoup(response.text, "html.parser")
-            #self.extracting_data(soup, link_updated)
+            self.extracting_data(soup, link_updated)
 
 
     def extracting_data(self, soup, link_apdated):
@@ -61,8 +61,27 @@ class Rentola:
         print("-=" * 90)
 
     def next_page(self, soup):
-        page = soup.find("a", class_="inline-flex shrink-0 items-center justify-center outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-50 h-[40px] text-base bg-transparent text-primary-100 rounded-lg font-medium").get("href")
-        link = (self.url + page)
-        print(link)
-        self.entering_category(link)
+
+        #page = soup.find("div", class_="flex items-end gap-2 sm:mx-6").find_all("a")[3].text
+        page_int = int(476)
+       
+        for cont in range(0,page_int + 1):
+            
+            links = (f"https://rentola.pt/alugar?page={cont}")
+            self.entering_category(links)
+
+            print(links)
+            print("*" * 90)
+
+            
+
+"""page = soup.find("a", class_="inline-flex shrink-0 items-center justify-center outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-50 h-[40px] text-base bg-transparent text-primary-100 rounded-lg font-medium").get("href")
+final = soup.find("a", class_="inline-flex shrink-0 items-center justify-center outline-none transition-colors disabled:cursor-not-allowed disabled:opacity-50 h-[40px] text-base bg-transparent text-grey-400 pointer-events-none cursor-not-allowed opacity-50 rounded-lg font-medium")
+if "/alugar?page=" in page:
+    page = page
+    print(page)"""
+            #link = page.get("href")
+            #link_updated = (self.url + link)
+            
+            #self.entering_category(link_updated)
 Rentola().requisicao() 
