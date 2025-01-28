@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import mysql.connector
+import time
 
 
 class Rentola:
@@ -8,24 +9,25 @@ class Rentola:
     def __init__(self):
         
         self.url = "https://rentola.pt/"
+        self.headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"}        
         self.data_dict = {}
 
 
     def requisicao(self):
-        response = requests.get(self.url)
+        response = requests.get(self.url, headers=self.headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
         get_link = soup.find("div", class_="flex mb-2 w-max gap-4").find_all("a")[5]
         link = get_link.get("href")
         link_updated = (self.url + link)
-        response = requests.get(link_updated)
+        response = requests.get(link_updated, headers=self.headers)
         soup = BeautifulSoup(response.text, "html.parser")
         self.entering_category(link_updated)
         
 
     def entering_category(self, url):
         
-        response = requests.get(url)
+        response = requests.get(url, headers=self.headers)
         soup = BeautifulSoup(response.text, "html.parser")
         self.entering_properties(soup)
         self.next_page(soup)
@@ -34,7 +36,8 @@ class Rentola:
         for get_link in soup.find_all("a", class_="absolute inset-0 z-[1]"):
             link = get_link.get("href")
             link_updated = (self.url + link)
-            response = requests.get(link_updated)
+            response = requests.get(link_updated, headers=self.headers)
+            time.sleep(2)
             soup = BeautifulSoup(response.text, "html.parser")
             self.extracting_data(soup, link_updated)
 
@@ -45,18 +48,13 @@ class Rentola:
         self.data_dict["Information"] = soup.find("p", class_="line-clamp-5").text
         self.data_dict["Type_property"] = soup.find("p", class_="text-sm font-[400]").text            
         self.data_dict["Price"] = soup.find("p", class_="mb-6 text-[32px] font-bold").text
-        """entry_price = soup.find("span", class_="font-medium text-primary-100").text
-        if entry_price != "Ilimitado":
-            self.data_dict["Entry_price"] = entry_price"""
         self.data_dict["Rooms"] = soup.find_all("p", class_="text-sm font-[400]")[1].text
         self.data_dict["Location"] = soup.find("p", class_="text-primary-100").text
         Available = soup.find_all ("div", class_="mb-4 flex justify-between")[2].find_all("span")[1].text
         if Available != "Ilimitado" and "ASAP":
             self.data_dict["Available"] = Available
-          
         else:
             self.data_dict["Available"] = soup.find_all ("div", class_="mb-4 flex justify-between")[1].find_all("span")[1].text
-          
         self.data_dict["link"] = link_apdated
 
         print(self.data_dict)
