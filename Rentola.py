@@ -28,7 +28,7 @@ class Rentola:
         response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
         self.entering_properties(soup)
-        #self.next_page(soup)
+        self.next_page(soup)
 
     def entering_properties(self, soup):
         for get_link in soup.find_all("a", class_="absolute inset-0 z-[1]"):
@@ -59,23 +59,24 @@ class Rentola:
           
         self.data_dict["link"] = link_apdated
 
-        #print(self.data_dict)
+        print(self.data_dict)
         print("-=" * 90)
 
         self.save_mysql()
-
+ 
     def next_page(self, soup):
 
         link = soup.select('div [role="navigation"] a')
         test = link[len(link)-1].get("href")
         link_updated = (self.url + test)
         print("*" * 90)
-        #print(link_updated)
+        print(link_updated)
         print("*" * 90)
         self.entering_category(link_updated)
 
 
     def save_mysql(self):
+
         db_connection = mysql.connector.connect(
         host=("127.0.0.1"),
         port=("3306"),       
@@ -90,14 +91,15 @@ class Rentola:
             print("Conexão com o banco de dados falhou.")
             
         cursor = db_connection.cursor()
-        print(cursor)
+        
 
 
         insert_query = """
-                        INSERT INTO  Rentola(Title, Information, Type_property, Price, Rooms, Location, Available, link)
+                        INSERT INTO  Properties(Title, Information, Type_property, Price, Rooms, Location, Available, link)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                         """
         
+
         cursor.execute(insert_query, (
                 self.data_dict["Title"],
                 self.data_dict["Information"],
@@ -108,7 +110,13 @@ class Rentola:
                 self.data_dict["Available"],
                 self.data_dict["link"]
             ))
+        db_connection.commit()
 
-    """db_connection.commit()
-"""
+
+        print("Dados salvos com sucesso!")
+    
+
+        cursor.close()
+        db_connection.close()
+
 Rentola().requisicao() 
